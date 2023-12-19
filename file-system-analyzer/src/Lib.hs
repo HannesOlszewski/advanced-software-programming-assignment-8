@@ -1,16 +1,20 @@
 module Lib (
     FileStats(..),
+    SortDirection(..),
     emptyStats,
     updateStats,
     combineStats,
     analyzeDirectoryWithSimpleProcessor,
-    prettyPrintSize
+    prettyPrintSize,
+    sortFileTypeCounts
 ) where
 
 import System.Directory
 import System.FilePath
-import Control.Monad (foldM, forM)
+import Control.Monad (foldM)
 import qualified Data.Map as Map
+import Data.List (sortBy)
+import Data.Ord (comparing)
 
 -- Data structure to hold file statistics
 data FileStats = FileStats {
@@ -22,6 +26,14 @@ data FileStats = FileStats {
 -- Initialize empty statistics
 emptyStats :: FileStats
 emptyStats = FileStats 0 0 Map.empty
+
+-- Data type for sort direction
+data SortDirection = ASC | DESC deriving (Show, Eq)
+
+-- Function to sort the fileTypeCounts
+sortFileTypeCounts :: SortDirection -> Map.Map String Integer -> [(String, Integer)]
+sortFileTypeCounts ASC counts = sortBy (comparing snd) $ Map.toList counts
+sortFileTypeCounts DESC counts = sortBy (flip $ comparing snd) $ Map.toList counts
 
 -- Function to update statistics with a new file
 updateStats :: Integer -> String -> FileStats -> FileStats
