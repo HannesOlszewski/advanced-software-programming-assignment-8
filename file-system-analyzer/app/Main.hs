@@ -10,4 +10,4 @@ main = do
     putStrLn $ "Analysing directory: " ++ directory
     putStrLn $ "Total size: " ++ prettyPrintSize (totalSize stats)
     putStrLn $ "Total files: " ++ show (totalFiles stats)
-    putStrLn $ "File type counts: " ++ show (fileTypeCounts stats)
+    putStrLn $ "File type counts: " ++ show (sortFileTypeCounts DESC (fileTypeCounts stats))
