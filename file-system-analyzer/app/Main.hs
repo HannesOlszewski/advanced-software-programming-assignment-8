@@ -15,7 +15,8 @@ main = do
         putStrLn $ "Analysing directory: " ++ directory
         putStrLn $ "Total size: " ++ prettyPrintSize (totalSize stats)
         putStrLn $ "Total files: " ++ show (totalFiles stats)
-        putStrLn $ "File type counts: " ++ show (sortFileTypeCounts DESC (fileTypeCounts stats))
+        -- putStrLn $ "File type counts: " ++ show (sortFileTypeCounts DESC (fileTypeCounts stats))
+        putStrLn $ "Top three file types: " ++ show (take 3 (sortFileTypeCounts DESC (fileTypeCounts stats)))
         )
         (\e -> do
             let err = show (e :: IOException)
