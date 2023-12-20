@@ -9,6 +9,23 @@ kb = 1024
 
 spec :: Spec
 spec = do
+  describe "emptyStats" $ do
+    it "initializes empty stats correctly" $ do
+      emptyStats `shouldBe` FileStats 0 0 Map.empty
+  
+  describe "sortFileTypeCounts" $ do
+    it "sorts file type counts in ascending order" $ do
+      let counts = Map.fromList [(".txt", 2), (".hs", 1), (".py", 3)]
+      let sorted = sortFileTypeCounts ASC counts
+
+      sorted `shouldBe` [(".hs", 1), (".txt", 2), (".py", 3)]
+    
+    it "sorts file type counts in descending order" $ do
+      let counts = Map.fromList [(".txt", 2), (".hs", 1), (".py", 3)]
+      let sorted = sortFileTypeCounts DESC counts
+
+      sorted `shouldBe` [(".py", 3), (".txt", 2), (".hs", 1)]
+
   describe "updateStats" $ do
     it "updates FileStats correctly for a new file" $ do
       let initialStats = emptyStats
@@ -29,6 +46,27 @@ spec = do
       -- show that the original stats are unchanged
       stats1 `shouldBe` FileStats 100 1 (Map.fromList [(".txt", 1)])
       stats2 `shouldBe` FileStats 300 2 (Map.fromList [(".txt", 1), (".hs", 1)])
+    
+  describe "getFileInfo" $ do
+    it "gets file info correctly" $ do
+      let path = "test/test-data/test.txt"
+      (fileSize, extension) <- getFileInfo path
+
+      fileSize `shouldBe` 150
+      extension `shouldBe` ".txt"
+    
+  describe "sortFileTypeCounts" $ do
+    it "sorts file type counts in ascending order" $ do
+      let counts = Map.fromList [(".txt", 2), (".hs", 1)]
+      let sorted = sortFileTypeCounts ASC counts
+
+      sorted `shouldBe` [(".hs", 1), (".txt", 2)]
+    
+    it "sorts file type counts in descending order" $ do
+      let counts = Map.fromList [(".txt", 2), (".hs", 1)]
+      let sorted = sortFileTypeCounts DESC counts
+
+      sorted `shouldBe` [(".txt", 2), (".hs", 1)]
 
   describe "combineStats" $ do
     it "combines two FileStats correctly" $ do
@@ -69,6 +107,32 @@ spec = do
       prettyPrintSize (kb * kb * kb * 10) `shouldBe` "10 GB 0 bytes"
       prettyPrintSize (kb * kb * kb * 100) `shouldBe` "100 GB 0 bytes"
       prettyPrintSize (kb * kb * kb * 1000) `shouldBe` "1000 GB 0 bytes"
+  
+  describe "traverseDirectoryWithProcessor" $ do
+    it "traverses a directory correctly" $ do
+      let dir = "test/test-data"
+      stats <- traverseDirectoryWithProcessor simpleFileProcessor dir
+
+      stats `shouldBe` FileStats 150 3 (Map.fromList [(".txt", 2), (".hs", 1)])
+    
+    it "traverses a directory with subdirectories correctly" $ do
+      let dir = "test/test-data-2"
+      stats <- traverseDirectoryWithProcessor simpleFileProcessor dir
+
+      stats `shouldBe` FileStats 150 3 (Map.fromList [(".txt", 2), (".hs", 1)])
+  
+  describe "analyzeDirectoryWithSimpleProcessor" $ do
+    it "analyzes a directory correctly" $ do
+      let dir = "test/test-data"
+      stats <- analyzeDirectoryWithSimpleProcessor dir
+
+      stats `shouldBe` FileStats 150 3 (Map.fromList [(".txt", 2), (".hs", 1)])
+    
+    it "analyzes a directory with subdirectories correctly" $ do
+      let dir = "test/test-data-2"
+      stats <- analyzeDirectoryWithSimpleProcessor dir
+
+      stats `shouldBe` FileStats 150 3 (Map.fromList [(".txt", 2), (".hs", 1)])
 
 main :: IO ()
 main = hspec spec

@@ -1,12 +1,16 @@
 module Lib (
     FileStats(..),
     SortDirection(..),
+    FileProcessor,
     emptyStats,
     updateStats,
     combineStats,
     analyzeDirectoryWithSimpleProcessor,
     prettyPrintSize,
-    sortFileTypeCounts
+    sortFileTypeCounts,
+    getFileInfo,
+    traverseDirectoryWithProcessor,
+    simpleFileProcessor
 ) where
 
 import System.Directory
@@ -96,4 +100,3 @@ simpleFileProcessor path stats = do
 -- Usage in main or other functions
 analyzeDirectoryWithSimpleProcessor :: FilePath -> IO FileStats
 analyzeDirectoryWithSimpleProcessor = traverseDirectoryWithProcessor simpleFileProcessor
-
