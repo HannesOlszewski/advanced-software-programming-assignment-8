@@ -20,6 +20,10 @@ import qualified Data.Map as Map
 import Data.List (sortBy)
 import Data.Ord (comparing)
 
+-------------------------------------------------------------------------------
+-- Pure functionality ---------------------------------------------------------
+-------------------------------------------------------------------------------
+
 -- Data structure to hold file statistics
 data FileStats = FileStats {
     totalSize :: Integer,
@@ -27,12 +31,12 @@ data FileStats = FileStats {
     fileTypeCounts :: Map.Map String Integer
 } deriving (Show, Eq)
 
+-- Data type for sort direction
+data SortDirection = ASC | DESC deriving (Show, Eq)
+
 -- Initialize empty statistics
 emptyStats :: FileStats
 emptyStats = FileStats 0 0 Map.empty
-
--- Data type for sort direction
-data SortDirection = ASC | DESC deriving (Show, Eq)
 
 -- Function to sort the fileTypeCounts
 sortFileTypeCounts :: SortDirection -> Map.Map String Integer -> [(String, Integer)]
@@ -46,13 +50,6 @@ updateStats fileSize extension stats =
         updatedFiles = totalFiles stats + 1
         updatedCounts = Map.insertWith (+) extension 1 (fileTypeCounts stats)
     in FileStats updatedSize updatedFiles updatedCounts
-
--- IO function to get file information
-getFileInfo :: FilePath -> IO (Integer, String)
-getFileInfo path = do
-    fileSize <- getFileSize path
-    let extension = takeExtension path
-    return (fileSize, extension)
 
 -- Function to combine two FileStats structures
 combineStats :: FileStats -> FileStats -> FileStats
@@ -73,8 +70,19 @@ prettyPrintSize size
     | size < kb * kb * kb = show (size `div` (kb * kb)) ++ " MB " ++ prettyPrintSize (size `mod` (kb * kb))
     | otherwise = show (size `div` (kb * kb * kb)) ++ " GB " ++ prettyPrintSize (size `mod` (kb * kb * kb))
 
+-------------------------------------------------------------------------------
+-- IO functionality -----------------------------------------------------------
+-------------------------------------------------------------------------------
+
 -- Function type for processing a file
 type FileProcessor = FilePath -> FileStats -> IO FileStats
+
+-- IO function to get file information
+getFileInfo :: FilePath -> IO (Integer, String)
+getFileInfo path = do
+    fileSize <- getFileSize path
+    let extension = takeExtension path
+    return (fileSize, extension)
 
 -- Higher-order function that applies a given file processor during directory traversal
 traverseDirectoryWithProcessor :: FileProcessor -> FilePath -> IO FileStats
